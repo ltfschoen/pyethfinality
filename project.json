@@ -1,0 +1,19 @@
+{
+  "version":"7",
+  "compilation":{
+    "contracts_source_dirs": ["./contracts"],
+    "import_remappings": []
+  },
+  "web3": {
+    "TestRPC": {
+      "provider": {
+        "class": "web3.providers.tester.TestRPCProvider"
+      }
+    },
+    "Tester": {
+      "provider": {
+        "class": "web3.providers.tester.EthereumTesterProvider"
+      }
+    }
+  }
+}

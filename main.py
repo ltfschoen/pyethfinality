@@ -14,7 +14,9 @@ pragma solidity ^0.4.0;
 
 contract Greeter {
     string public greeting;
-    
+
+    event LogGreeting();
+
     /// Greeter smart contract - Greeter() function called
     function Greeter() {
         greeting = 'Hello';
@@ -27,6 +29,7 @@ contract Greeter {
 
     /// Greeter smart contract - greet() function called
     function greet() constant returns (string) {
+        LogGreeting();
         return greeting;
     }
 }
@@ -35,7 +38,7 @@ contract Greeter {
 # Compiled source code
 compiled_sol = compile_source(contract_source_code)
 # Reference: https://github.com/ethereum/py-solc
-# compiled_sol = compile_files(["./contract.sol"])
+# compiled_sol = compile_files(["./contracts/Greeter.sol"])
 contract_interface = compiled_sol['<stdin>:Greeter']
 
 # Web3.py instance
@@ -68,3 +71,8 @@ contract_instance.setGreeting('Nihao', transact={'from': web3.eth.accounts[0]})
 print('Setting value to: Nihao')
 print('Contract value: {}'.format(contract_instance.greet()))
 print('TestRPC block number: {}'.format(web3.eth.blockNumber))
+print('TestRPC block details: {}'.format(web3.eth.getBlock('latest')))
+
+print('TestRPC current gas price: {}'.format(web3.eth.gasPrice))
+print('TestRPC syncing status: {}'.format(web3.eth.syncing))
+print('TestRPC mining status: {}'.format(web3.eth.mining))

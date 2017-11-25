@@ -20,6 +20,9 @@ COPY requirements.txt .
 # Install python dependencies
 RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
-RUN pip3 install web3 py-solc
+RUN pip3 install web3 py-solc populus
+# Fix for populus
+RUN export LC_ALL=C.UTF-8
+RUN export LANG=C.UTF-8
 
 WORKDIR /code

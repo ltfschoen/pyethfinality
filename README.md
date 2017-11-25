@@ -4,9 +4,12 @@
 PyEthFinality
 ---
 
+* Trello Board (Project Planning) - https://trello.com/b/rkTmcLNw/pyethfinality
+
 # Table of Contents
   * [Chapter 1 - Docker Setup](#chapter-1)
-  * [Chapter 2 - Unsorted](#chapter-2)
+  * [Chapter 2 - Tests](#chapter-2)
+  * [Chapter 999 - Unsorted](#chapter-999)
   * [Chapter 1000 - ERRORS - macOS Unix Bash Setup Attempt](#chapter-1000)
 
 ## Chapter 1 - Docker Setup <a id="chapter-1"></a>
@@ -33,6 +36,10 @@ PyEthFinality
     ```
     solc --help
     python3 main.py
+    
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    populus
     ```
     * Show where Python Packages are installed
       ```
@@ -91,7 +98,17 @@ PyEthFinality
           && chmod a+x /usr/local/bin/solc
       ```
 
-## Chapter 2 - Unsorted <a id="chapter-2"></a>
+## Chapter 2 - Tests <a id="chapter-2"></a>
+
+* Run PyTest in Docker shell
+  ```
+  python3.4 -m pytest .
+
+  python3.4 -m py.test tests/
+  populus deploy --chain tester --no-wait-for-sync
+  ```
+
+## Chapter 999 - Unsorted <a id="chapter-999"></a>
 
 * TODO - Testing with PyTest  
 * TODO - Front-End with Truffle
