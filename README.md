@@ -5,11 +5,105 @@ PyEthFinality
 ---
 
 # Table of Contents
-  * [Chapter 0 - ERRORS - macOS Unix Bash Setup Attempt](#chapter-0)
-  * [Chapter 1 - ERRORS - Docker Ubuntu (Trusty) Setup Attempt](#chapter-1)
+  * [Chapter 1 - Docker Setup](#chapter-1)
   * [Chapter 2 - Unsorted](#chapter-2)
+  * [Chapter 1000 - ERRORS - macOS Unix Bash Setup Attempt](#chapter-1000)
 
-## Chapter 0 - ERRORS - macOS Unix Bash Setup Attempt <a id="chapter-0"></a>
+## Chapter 1 - Docker Setup <a id="chapter-1"></a>
+
+* Docker
+  * Run Docker for Mac
+  * Run Docker Container. Use Ubuntu packages listed at: https://packages.ubuntu.com/search?suite=all&section=all&arch=any&keywords=solc&searchon=names
+    ```
+    docker-compose up --force-recreate --build -d
+    ```
+    
+  * Open Docker sandbox session
+    ```
+    docker-compose exec sandbox bash
+    ```
+    * Show Linux version - http://docs.python-guide.org/en/latest/starting/install3/linux/
+      ```
+      cat /proc/version
+      python3 --version
+      ```
+      * TODO - Add PyEnv and switch to latest version of Python 3
+
+  * Run
+    ```
+    solc --help
+    python3 main.py
+    ```
+    * Show where Python Packages are installed
+      ```
+      python3 -m site
+      which /root/.py-solc/solc-v0.4.17/bin/solc
+      python3.4 -m solc.install v0.4.17
+      ```
+    * Note: Any files created or modified in the /code directory of the Docker VM are synchronised with this project
+    * Note: Manually compile Solidity smart contract with `solc --bin -o $PWD/solcoutput dapp-bin=/usr/local/lib/dapp-bin contract.sol`
+
+  * Remove Docker network
+    ```
+    docker-compose down
+    ```
+
+  * Other Docker commands not necessary
+    ```
+    docker network ps
+    docker network rm pyethfinality_default
+    ```
+    * References:
+      * https://docs.docker.com/compose/reference/up/
+      * https://docs.docker.com/engine/reference/commandline/network_prune/#related-commands
+
+  * IGNORE - Unsuccessful attempt to install Solc using Snap on Ubuntu 16.04 (or Snapd on Ubuntu 14.04).
+    * Snapcraft - https://docs.snapcraft.io/core/install-ubuntu
+    * Snapd - https://github.com/snapcore/snapd
+    * Snapd - https://wiki.archlinux.org/index.php/Snapd
+    * Systemd - https://wiki.ubuntu.com/systemd
+    * Forum - https://forum.snapcraft.io/c/snapd
+    ```
+    apt-get install snapd
+    snap --help
+    ls /lib/systemd/system/snap*; echo; systemctl list-unit-files | grep snap; echo; dpkg -L snapd | grep systemd; echo; pgrep -a snap
+    ```
+    * Note: The following approach to try and install Solc did not work as I encountered the error `Failed to get D-Bus connection: No connection to service manager.` and could not overcome it. 
+      ```
+      snap download solc
+      systemctl status snapd.service
+      systemctl enable snapd
+      service snap start
+      /usr/lib/snapd/snapd
+      ```
+    * Check if booting with Systemd
+      ```
+      ps -p 1 -o comm=
+      ```
+    * Attempt to boot with Systemd by changing the docker-compose.yml file with the following instead of `command: tail -f /dev/null` did not work either
+      ```
+      command: /lib/systemd/systemd
+      ```
+    * After trying all the steps in this section without success, I asked a question on ethereum/solidity channel of Gitter. I received a response from @MicahZoltu, who suggested adding the following to my Dockerfile, which worked. I was then able to run `solc --help` in the Docker VM.
+      ```
+      ARG SOLC_VERSION=v0.4.18
+      RUN wget --quiet --output-document /usr/local/bin/solc https://github.com/ethereum/solidity/releases/download/${SOLC_VERSION}/solc-static-linux \
+          && chmod a+x /usr/local/bin/solc
+      ```
+
+## Chapter 2 - Unsorted <a id="chapter-2"></a>
+
+* TODO - Testing with PyTest  
+* TODO - Front-End with Truffle
+
+* Reference 
+  * Finality - https://blog.ethereum.org/2016/05/09/on-settlement-finality/
+  
+* Other References
+  * Cloud9 / Linux PyEthereum - https://forum.ethereum.org/discussion/comment/16737#Comment_16737
+  * Cloud9 / Linux PyEthereum - http://joeysprogrammingblog.com/tag/pyethereum/
+
+## Chapter 1000 - ERRORS - macOS Unix Bash Setup Attempt <a id="chapter-1000"></a>
 
 Initially the approach was to try to create a Python application on macOS in Unix Bash without a virtual machine. I used the quick start code provided at https://github.com/pipermerriam/web3.py / https://pypi.python.org/pypi/web3/ to write main.py, and setup TestRPC code in a separate terminal window using a code snippet that I had previously prepared for another project (https://github.com/ltfschoen/solidity_test). The intention was to use Py-Solc as a wrapper for Solc.js in order to be able to use the Solidity compiler to compile the sample smart contract that was written in Solidity, but this did not work and I took drastic steps to try and make it work. Web3.py would then deploy it to the TestRPC blockchain. Unfortunately I encountered errors, so I decided to try to use a virtual machine with Docker instead.
 If you happen to know how to overcome the error I would be grateful if you would please create an [Issue](https://github.com/ltfschoen/pyethfinality/issues) and explain it.
@@ -161,98 +255,3 @@ If you happen to know how to overcome the error I would be grateful if you would
         Must provide a file
         ```
       * Note: Pyethereum and [Pyethapp](https://github.com/ethereum/pyethapp/blob/287e36e49736cfd2ec150822010d0c0f4d85c781/.travis.yml) travis.yml files both use APT for solc.
-
-
-## Chapter 1 - ERRORS - Docker Ubuntu (Trusty) Setup Attempt <a id="chapter-1"></a>
-
-* Docker
-  * Run Docker for Mac
-  * Run Docker Container. Use Ubuntu packages listed at: https://packages.ubuntu.com/search?suite=all&section=all&arch=any&keywords=solc&searchon=names
-    ```
-    docker-compose up --force-recreate --build -d
-    ```
-    
-  * Open Docker sandbox session
-    ```
-    docker-compose exec sandbox bash
-    ```
-    * Show Linux version - http://docs.python-guide.org/en/latest/starting/install3/linux/
-      ```
-      cat /proc/version
-      python3 --version
-      ```
-      * TODO - Add PyEnv and switch to latest version of Python 3
-
-  * Run
-    ```
-    solc --help
-    python3 main.py
-    ```
-    * Show where Python Packages are installed
-      ```
-      python3 -m site
-      which /root/.py-solc/solc-v0.4.17/bin/solc
-      python3.4 -m solc.install v0.4.17
-      ```
-    * Note: Any files created or modified in the /code directory of the Docker VM are synchronised with this project
-    * Note: Manually compile Solidity smart contract with `solc --bin -o $PWD/solcoutput dapp-bin=/usr/local/lib/dapp-bin contract.sol`
-
-  * Remove Docker network
-    ```
-    docker-compose down
-    ```
-
-  * Other Docker commands not necessary
-    ```
-    docker network ps
-    docker network rm pyethfinality_default
-    ```
-    * References:
-      * https://docs.docker.com/compose/reference/up/
-      * https://docs.docker.com/engine/reference/commandline/network_prune/#related-commands
-
-  * IGNORE - Unsuccessful attempt to install Solc using Snap on Ubuntu 16.04 (or Snapd on Ubuntu 14.04).
-    * Snapcraft - https://docs.snapcraft.io/core/install-ubuntu
-    * Snapd - https://github.com/snapcore/snapd
-    * Snapd - https://wiki.archlinux.org/index.php/Snapd
-    * Systemd - https://wiki.ubuntu.com/systemd
-    * Forum - https://forum.snapcraft.io/c/snapd
-    ```
-    apt-get install snapd
-    snap --help
-    ls /lib/systemd/system/snap*; echo; systemctl list-unit-files | grep snap; echo; dpkg -L snapd | grep systemd; echo; pgrep -a snap
-    ```
-    * Note: The following approach to try and install Solc did not work as I encountered the error `Failed to get D-Bus connection: No connection to service manager.` and could not overcome it. 
-      ```
-      snap download solc
-      systemctl status snapd.service
-      systemctl enable snapd
-      service snap start
-      /usr/lib/snapd/snapd
-      ```
-    * Check if booting with Systemd
-      ```
-      ps -p 1 -o comm=
-      ```
-    * Attempt to boot with Systemd by changing the docker-compose.yml file with the following instead of `command: tail -f /dev/null` did not work either
-      ```
-      command: /lib/systemd/systemd
-      ```
-    * After trying all the steps in this section without success, I asked a question on ethereum/solidity channel of Gitter. I received a response from @MicahZoltu, who suggested adding the following to my Dockerfile, which worked. I was then able to run `solc --help` in the Docker VM.
-      ```
-      ARG SOLC_VERSION=v0.4.18
-      RUN wget --quiet --output-document /usr/local/bin/solc https://github.com/ethereum/solidity/releases/download/${SOLC_VERSION}/solc-static-linux \
-          && chmod a+x /usr/local/bin/solc
-      ```
-
-## Chapter 2 - Unsorted <a id="chapter-2"></a>
-
-* TODO - Testing with PyTest  
-* TODO - Front-End with Truffle
-
-* Reference 
-  * Finality - https://blog.ethereum.org/2016/05/09/on-settlement-finality/
-  
-* Other References
-  * Cloud9 / Linux PyEthereum - https://forum.ethereum.org/discussion/comment/16737#Comment_16737
-  * Cloud9 / Linux PyEthereum - http://joeysprogrammingblog.com/tag/pyethereum/

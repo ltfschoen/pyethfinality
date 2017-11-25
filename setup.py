@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# Reference: https://docs.python.org/3/distutils/setupscript.html
 import os
 import sys
 
