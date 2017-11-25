@@ -1,0 +1,9 @@
+version: '3'
+services:
+  sandbox:
+    build:
+      context: .
+    volumes:
+      - .:/code
+    # command: /lib/systemd/systemd
+    command: tail -f /dev/null
