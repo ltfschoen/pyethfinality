@@ -22,6 +22,8 @@ RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VER
 RUN tar xf Python-${PYTHON_VERSION}.tgz && cd Python-${PYTHON_VERSION} && ./configure && make && make install
 # Source the bash_profile in linux with `. ~/.bash_profile`
 RUN echo 'PATH="$HOME/bin/python3:$PATH"; export PATH' >> ~/.bash_profile && . ~/.bash_profile
+# Fixes https://trello.com/c/K6jmmjvo/29-conflicts-due-to-cached-pyc-files
+RUN echo 'export PYTHONDONTWRITEBYTECODE=1' >> ~/.bash_profile && . ~/.bash_profile
 RUN which python3
 RUN which pip3
 

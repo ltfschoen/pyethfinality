@@ -102,3 +102,6 @@ ENV/
 
 # TestRPC blockchain
 db/
+
+# Compiled Solidity Contracts
+bin/

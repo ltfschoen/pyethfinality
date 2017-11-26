@@ -10,7 +10,7 @@ from web3.contract import ConciseContract
 
 # Solidity source code
 contract_source_code = '''
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.17;
 
 contract Greeter {
     string public greeting;
@@ -33,7 +33,7 @@ contract Greeter {
         LogGreeting(greeting);
         return greeting;
     }
-    
+
     /// Greeter smart contract - Fallback function called
     // Fallback function called when contract is called but 
     // no existing function was specified. 
