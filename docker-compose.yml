@@ -3,6 +3,7 @@ services:
   sandbox:
     build:
       context: .
+    image: pyethfinality_sandbox:tag
     volumes:
       - .:/code
     # command: /lib/systemd/systemd

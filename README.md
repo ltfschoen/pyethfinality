@@ -45,6 +45,11 @@ PyEthFinality
   python3 main.py
   ```
 
+* Run PyTest in Docker shell
+  ```
+  python3 -m pytest .
+  ```
+
 ## Chapter 1 - Docker Setup <a id="chapter-1"></a>
 
 * Docker
@@ -108,7 +113,7 @@ PyEthFinality
       ```
       python3 -m site
       which /root/.py-solc/solc-v0.4.17/bin/solc
-      python3.4 -m solc.install v0.4.17
+      python3 -m solc.install v0.4.17
       ```
     * Note: Any files created or modified in the /code directory of the Docker VM are synchronised with this project
     * Note: Manually compile Solidity smart contract with `solc --bin -o $PWD/solcoutput dapp-bin=/usr/local/lib/dapp-bin contract.sol`
@@ -160,9 +165,9 @@ PyEthFinality
 
 * Run PyTest in Docker shell
   ```
-  python3.4 -m pytest .
+  python3 -m pytest .
 
-  python3.4 -m py.test tests/
+  python3 -m pytest tests/
   populus deploy --chain tester --no-wait-for-sync
   ```
 

@@ -3,7 +3,9 @@ RUN apt-get update
 # Install dependencies for PPA
 RUN apt-get install -y software-properties-common python-software-properties
 RUN add-apt-repository ppa:ethereum/ethereum
-RUN apt-get install -y libssl-dev python3-pip wget unzip vim
+RUN apt-get install -y tmux python-setuptools
+RUN apt-get install -y build-essential automake pkg-config libtool libffi-dev libgmp-dev python3-cffi
+RUN apt-get install -y python-dev libssl-dev python3-pip wget unzip vim
 RUN apt-get install -y systemd libpam-systemd git
 
 # tip provided by @MicahZoltu in ethereum/solidity channel on Gitter
@@ -12,13 +14,27 @@ ARG SOLC_VERSION=v0.4.17
 RUN wget --quiet --output-document /usr/local/bin/solc https://github.com/ethereum/solidity/releases/download/${SOLC_VERSION}/solc-static-linux \
     && chmod a+x /usr/local/bin/solc
 
+# Download Python, extract, configure, compile, test, and install the build
+# Reference - https://passingcuriosity.com/2015/installing-python-from-source/
+ARG PYTHON_VERSION=3.6.3
+RUN wget https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz
+# Ignore `make test`
+RUN tar xf Python-${PYTHON_VERSION}.tgz && cd Python-${PYTHON_VERSION} && ./configure && make && make install
+# Source the bash_profile in linux with `. ~/.bash_profile`
+RUN echo 'PATH="$HOME/bin/python3:$PATH"; export PATH' >> ~/.bash_profile && . ~/.bash_profile
+RUN which python3
+RUN which pip3
+
 # Copy over requirements
 COPY main.py .
 COPY README.md .
 COPY requirements.txt .
 
 # Install python dependencies
-RUN pip3 install --upgrade pip
+# RUN pip3 install --upgrade pip
+
+# Avoid errors when running requirements.txt
+RUN pip3 install --upgrade cffi
 RUN pip3 install -r requirements.txt
 RUN pip3 install web3 py-solc populus
 # Fix for populus
