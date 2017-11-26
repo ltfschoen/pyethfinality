@@ -26,3 +26,17 @@ RUN export LC_ALL=C.UTF-8
 RUN export LANG=C.UTF-8
 
 WORKDIR /code
+
+# Install Node.js for use of testrpc executable
+RUN apt-get install --yes curl
+# RUN curl --silent --location https://deb.nodesource.com/setup_4.x | sudo bash -
+RUN curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
+# RUN add-apt-repository -y ppa:chris-lea/node.js
+RUN apt-get install -y nodejs
+
+# Fix npm since not the latest version installed by apt-get
+# RUN npm install -g npm
+
+RUN npm install -g ethereumjs-testrpc
+
+RUN mkdir -p db/chaindb;

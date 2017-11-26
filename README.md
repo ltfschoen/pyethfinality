@@ -16,12 +16,22 @@ PyEthFinality
 
 * Docker
   * Run Docker for Mac
-  * Run Docker Container. Use Ubuntu packages listed at: https://packages.ubuntu.com/search?suite=all&section=all&arch=any&keywords=solc&searchon=names
+  * Run Docker Container / Remove existing Docker network from image. Use Ubuntu packages listed at: https://packages.ubuntu.com/search?suite=all&section=all&arch=any&keywords=solc&searchon=names
     ```
+    docker-compose down
     docker-compose up --force-recreate --build -d
     ```
+  * Open Docker sandbox session (Multiple tabs)
+    ```
+    docker ps -l
     
-  * Open Docker sandbox session
+    # run interactive shell to the container 
+    docker exec -it <container_id> bash
+    
+    # create other interaction shells to the container (to run TestRPC)
+    docker exec -it <container_id> bash
+    ```
+  * Open Docker sandbox session (Single tab)
     ```
     docker-compose exec sandbox bash
     ```
@@ -29,18 +39,38 @@ PyEthFinality
       ```
       cat /proc/version
       python3 --version
+      solc --help
+
+      export LC_ALL=C.UTF-8
+      export LANG=C.UTF-8
+      populus
       ```
       * TODO - Add PyEnv and switch to latest version of Python 3
 
-  * Run
+  * Run (Docker terminal tab 2)
     ```
-    solc --help
+    rm -rf ./db;
+    mkdir -p db/chaindb;
+    testrpc --account '0x0000000000000000000000000000000000000000000000000000000000000001, 10002471238800000000000' \
+      --account '0x0000000000000000000000000000000000000000000000000000000000000002, 10004471238800000000000' \
+      --unlock '0x0000000000000000000000000000000000000000000000000000000000000001' \
+      --unlock '0x0000000000000000000000000000000000000000000000000000000000000002' \
+      --blocktime 0 \
+      --deterministic true \
+      --port 8545 \
+      --hostname localhost \
+      --gasPrice 20000000000 \
+      --gasLimit 0x47E7C4 \
+      --debug true \
+      --mem true \
+      --db './db/chaindb'
+    ```
+
+  * Run (Docker terminal tab 1)
+    ```
     python3 main.py
-    
-    export LC_ALL=C.UTF-8
-    export LANG=C.UTF-8
-    populus
     ```
+  * Other
     * Show where Python Packages are installed
       ```
       python3 -m site
@@ -49,11 +79,6 @@ PyEthFinality
       ```
     * Note: Any files created or modified in the /code directory of the Docker VM are synchronised with this project
     * Note: Manually compile Solidity smart contract with `solc --bin -o $PWD/solcoutput dapp-bin=/usr/local/lib/dapp-bin contract.sol`
-
-  * Remove Docker network
-    ```
-    docker-compose down
-    ```
 
   * Other Docker commands not necessary
     ```
@@ -109,6 +134,22 @@ PyEthFinality
   ```
 
 ## Chapter 999 - Unsorted <a id="chapter-999"></a>
+
+* Setup Populus Framework - http://populus.readthedocs.io/en/latest/quickstart.html#debian-ubuntu-mint
+  * Install Populus
+    ```
+    pip3 install populus
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    ```
+  * Initialise Populus
+    ```
+    populus init
+    ```
+  * Compile contract into ./build directory
+    ```
+    populus compile
+    ```
 
 * TODO - Testing with PyTest  
 * TODO - Front-End with Truffle
@@ -178,31 +219,7 @@ If you happen to know how to overcome the error I would be grateful if you would
   pip install eth-testrpc;  
   rm -rf ./db;
   mkdir -p db/chaindb;
-  testrpc --account '0x0000000000000000000000000000000000000000000000000000000000000001, 10002471238800000000000' \
-    --account '0x0000000000000000000000000000000000000000000000000000000000000002, 10004471238800000000000' \
-    --account '0x0000000000000000000000000000000000000000000000000000000000000003, 10004471238800000000000' \
-    --account '0x0000000000000000000000000000000000000000000000000000000000000004, 10004471238800000000000' \
-    --account '0x0000000000000000000000000000000000000000000000000000000000000005, 10004471238800000000000' \
-    --account '0x0000000000000000000000000000000000000000000000000000000000000006, 10004471238800000000000' \
-    --account '0x0000000000000000000000000000000000000000000000000000000000000007, 10004471238800000000000' \
-    --unlock '0x0000000000000000000000000000000000000000000000000000000000000001' \
-    --unlock '0x0000000000000000000000000000000000000000000000000000000000000002' \
-    --unlock '0x0000000000000000000000000000000000000000000000000000000000000003' \
-    --unlock '0x0000000000000000000000000000000000000000000000000000000000000004' \
-    --unlock '0x0000000000000000000000000000000000000000000000000000000000000005' \
-    --unlock '0x0000000000000000000000000000000000000000000000000000000000000006' \
-    --unlock '0x0000000000000000000000000000000000000000000000000000000000000007' \
-    --unlock '0x7e5f4552091a69125d5dfcb7b8c2659029395bdf' \
-    --unlock '0x2b5ad5c4795c026514f8317c7a215e218dccd6cf' \
-    --blocktime 0 \
-    --deterministic true \
-    --port 8545 \
-    --hostname localhost \
-    --gasPrice 20000000000 \
-    --gasLimit 0x47E7C4 \
-    --debug true \
-    --mem true \
-    --db './db/chaindb'
+  testrpc --db './db/chaindb'
   ```
 
 * Back-end

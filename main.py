@@ -15,7 +15,8 @@ pragma solidity ^0.4.0;
 contract Greeter {
     string public greeting;
 
-    event LogGreeting();
+    /// Greeter smart contract - LogGreeter() function event called
+    event LogGreeting(string log);
 
     /// Greeter smart contract - Greeter() function called
     function Greeter() {
@@ -29,8 +30,16 @@ contract Greeter {
 
     /// Greeter smart contract - greet() function called
     function greet() constant returns (string) {
-        LogGreeting();
+        LogGreeting(greeting);
         return greeting;
+    }
+    
+    /// Greeter smart contract - Fallback function called
+    // Fallback function called when contract is called but 
+    // no existing function was specified. 
+    // Allows ETH sent to be reverted.
+    function() { 
+        LogGreeting('Reverting');
     }
 }
 '''
@@ -42,8 +51,8 @@ compiled_sol = compile_source(contract_source_code)
 contract_interface = compiled_sol['<stdin>:Greeter']
 
 # Web3.py instance
-web3 = Web3(TestRPCProvider())
-# web3 = Web3(HTTPProvider('http://localhost:8545'))
+# web3 = Web3(TestRPCProvider())
+web3 = Web3(HTTPProvider('http://localhost:8545'))
 print('TestRPC accounts: {}'.format(web3.eth.accounts))
 print('TestRPC block number: {}'.format(web3.eth.blockNumber))
 
@@ -54,7 +63,7 @@ contract = web3.eth.contract(contract_interface['abi'], bytecode=contract_interf
 
 # Get transaction hash from deployed contract
 # http://web3py.readthedocs.io/en/latest/contracts.html?highlight=deploy#web3.contract.Contract.deploy
-tx_hash = contract.deploy(transaction={'from': web3.eth.accounts[0], 'gas': 410000})
+tx_hash = contract.deploy(transaction={'from': web3.eth.accounts[0], 'gas': 4712387})
 
 # Get tx receipt to get contract address
 tx_receipt = web3.eth.getTransactionReceipt(tx_hash)
