@@ -11,6 +11,9 @@ from web3.contract import ConciseContract
 from datetime import datetime
 from web3 import middleware
 from web3.middleware import pythonic_middleware, attrdict_middleware
+# Cache
+from werkzeug.contrib.cache import SimpleCache
+cache = SimpleCache()
 
 def current_time():
     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]
@@ -156,6 +159,13 @@ def make_request(*args):
             p = e
         raise Exception(p)
 
+def get_or_set_blockchain_data(name, serialized_blocks):
+    rv = cache.get(name)
+    if rv is None:
+        rv = serialized_blocks
+        cache.set(name, rv, timeout=5 * 60)
+    return rv
+
 def run():
     # Solidity source code
     contract_source_code = '''
@@ -285,8 +295,14 @@ def run():
     block1.accounts.append(account2)
 
     serialized_blocks = [b.serialize() for b in blockchain1.blocks]
+    serialized_blocks[0]['median_account_balance'] = blockchain1.median_account_balance()
     # random.shuffle(serialized_blocks)
     print('json dumps: {}'.format(json.dumps(serialized_blocks, indent=4, sort_keys=True)))
+    
+    # Store in cache - http://flask.pocoo.org/docs/0.12/patterns/caching/
+    get_or_set_blockchain_data('blockchain_data', serialized_blocks)
+
+    print('Cached data: {}'.format(get_or_set_blockchain_data('blockchain_data', None)))
 
     # Re-calculate blockchain median account balance
     print('Blockchain1 median account balance: {}'.format(blockchain1.median_account_balance()))

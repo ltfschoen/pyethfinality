@@ -23,6 +23,7 @@ PyEthFinality
 * Get the container_id with `docker ps -l`
 * Create 1st Bash Terminal tab and run interactive Docker shell (for running Python script) with `docker exec -it <container_id> bash`
 * Create 2nd Bash Terminal tab and run interactive Docker shell (for TestRPC) with `docker exec -it <container_id> bash`
+* Create 3rd Bash Terminal tab and run interactive Docker shell (for cURL requests to API) with `docker exec -it <container_id> bash`
 * Start up the TestRPC in the 2nd Bash Terminal's Docker shell
   ```
   rm -rf ./db;
@@ -45,6 +46,13 @@ PyEthFinality
   ```
   python3 ./scripts/src/main.py
   ```
+* Run cURL request to simulate request to API from a front-end Client App in the 3rd Bash Terminal tab's Docker shell
+  ```
+  curl -i 127.0.0.1:5000/api/v1.0/query?query=None&median_balance=True
+  ```
+  * Screenshot of response containing median account balance
+
+    ![alt tag](https://raw.githubusercontent.com/ltfschoen/pyethfinality/master/screenshots/api_response_middleware.png)
 
 * Run PyTest in Docker shell
   ```

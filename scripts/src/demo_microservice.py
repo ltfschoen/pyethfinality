@@ -2,6 +2,7 @@
 from __future__ import print_function
 import sys, json, traceback
 from flask import Flask, jsonify, request, make_response, abort
+import demo_subcurrency
 
 """
 RESTful web service endpoints using Flask.
@@ -21,7 +22,9 @@ def get_query():
         abort(400)
     print("Query Params: ", query_params, file=sys.stderr)
 
-    return jsonify({'success':True}), 200, {'ContentType':'application/json'}
+    response = demo_subcurrency.get_or_set_blockchain_data('blockchain_data', None)
+    # response = {'success':True}
+    return jsonify(response), 200, {'ContentType':'application/json'}
 
 @app.route('/', methods=['POST'])
 def post_messages():
@@ -46,5 +49,8 @@ def post_messages():
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-if __name__ == '__main__':
+def run():
     app.run(host='127.0.0.1', port=5000, debug=True, use_debugger=False, use_reloader=False)
+
+if __name__ == '__main__':
+    run()

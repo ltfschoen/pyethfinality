@@ -22,8 +22,8 @@ site.addsitedir(main_path+'/scripts/lib')
 
 import demo_greeting
 import demo_mockchain
-import demo_microservice
 import demo_subcurrency
+import demo_microservice
 
 def main():
     # print('Running Demo - Greeting')
@@ -32,6 +32,8 @@ def main():
     demo_mockchain.run()
     print('Running Demo - SubCurrency')
     demo_subcurrency.run()
+    print('Running Demo - Microservice API')
+    demo_microservice.run()
 
 if __name__ == '__main__':
     main()
