@@ -6,6 +6,7 @@ import random
 import json
 import hashlib
 import math
+from datetime import datetime
 
 
 def hexhash(x):
@@ -29,8 +30,10 @@ def hexhash(x):
     address = '0x' + hash_sha_digest
     return address
 
+def current_time():
+    return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]
 
-TransferEvent = collections.namedtuple('TransferEvent', 'sender, receiver, amount')
+TransferEvent = collections.namedtuple('TransferEvent', 'sender, receiver, amount, created_at')
 
 
 class Accounts(object):
@@ -88,8 +91,9 @@ class Accounts(object):
             if sender == receiver:
                 continue
             amount = random.randint(1, self.balances[sender])
+            created_at = current_time()
             self.transfer(sender, receiver, amount)
-            return TransferEvent(sender, receiver, amount)
+            return TransferEvent(sender, receiver, amount, created_at)
 
 
 class Block(object):
@@ -105,12 +109,13 @@ class Block(object):
             self.prevhash = prevblock.hash
         self.transfers = []
         self.prevblock = prevblock
+        self.created_at = current_time()
 
     def copy_transfers(self, other, fraction=0.5):
         assert isinstance(other, Block)
         for t in other.transfers[:int(len(other.transfers) * fraction)]:
             self.transfers.append(t)
-            self.accounts.transfer(t.sender, t.receiver, t.amount)
+            self.accounts.transfer(t.sender, t.receiver, t.amount, t.created_at)
 
     @property
     def hash(self):
@@ -124,6 +129,7 @@ class Block(object):
         s = dict(number=self.number,
                  hash=self.hash,
                  prevhash=self.prevhash,
+                 created_at=self.created_at,
                  transfers=[dict(x._asdict()) for x in self.transfers]
                  )
         if include_balances or self.number == 0:
