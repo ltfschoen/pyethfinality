@@ -10,6 +10,7 @@ PyEthFinality
   * [Chapter 0 - Quick Start Guide](#chapter-0)
   * [Chapter 1 - Docker Setup](#chapter-1)
   * [Chapter 2 - Tests](#chapter-2)
+  * [Chapter 3 - Editor / IDE](#chapter-3)
   * [Chapter 100 - Contributors, Bugs & Issues](#chapter-100)
   * [Chapter 999 - Unsorted](#chapter-999)
   * [Chapter 1000 - ERRORS - macOS Unix Bash Setup Attempt](#chapter-1000)
@@ -42,7 +43,7 @@ PyEthFinality
   ```
 * Run the Python script in the 1st Bash Terminal tab's Docker shell 
   ```
-  python3 main.py
+  python3 ./scripts/src/main.py
   ```
 
 * Run PyTest in Docker shell
@@ -106,7 +107,7 @@ PyEthFinality
 
   * Run (Docker terminal tab 1)
     ```
-    python3 main.py
+    python3 ./scripts/src/main.py
     ```
   * Other
     * Show where Python Packages are installed
@@ -170,6 +171,17 @@ PyEthFinality
   python3 -m pytest tests/
   populus deploy --chain tester --no-wait-for-sync
   ```
+
+## Chapter 3 - Editor / IDE <a id="chapter-3"></a>
+
+* Editor
+  * Visual Studio (VS) Code
+  * Setup - View Extensions - Press `SHIFT+CMD+X`
+    * solidity
+    * Solidity Extended
+    * solidity-solhint
+  * Compile Solidity Contract in VS Code - Press `FN+F5`
+
 
 ## Chapter 100 - Contributors, Bugs & Issues <a id="chapter-100"></a>
 
@@ -313,7 +325,7 @@ If you happen to know how to overcome the error I would be grateful if you would
   * Run Python CLI to experiment. Use the Simple Example in the Web3.py documentation
     * Run Python program 
       ```
-      python main.py
+      python ./scripts/src/main.py
       ```
       
     * Troubleshooting

@@ -47,7 +47,7 @@ contract Greeter {
 # Compiled source code
 compiled_sol = compile_source(contract_source_code)
 # Reference: https://github.com/ethereum/py-solc
-# compiled_sol = compile_files(["./contracts/Greeter.sol"])
+# compiled_sol = compile_files(["./contracts/src/Greeter.sol"])
 contract_interface = compiled_sol['<stdin>:Greeter']
 
 # Web3.py instance

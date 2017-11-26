@@ -28,9 +28,9 @@ RUN which python3
 RUN which pip3
 
 # Copy over requirements
-COPY main.py .
-COPY README.md .
-COPY requirements.txt .
+COPY ./scripts/src/main.py .
+COPY ./README.md .
+COPY ./requirements.txt .
 
 # Install python dependencies
 # RUN pip3 install --upgrade pip
