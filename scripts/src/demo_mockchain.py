@@ -1,4 +1,5 @@
 # Reference: https://gist.github.com/heikoheiko/a84b05c78d2971c26f2d3e3c49ec8d83
+# Converted to Python 3 by Luke Schoen
 
 import collections
 import random
@@ -7,13 +8,35 @@ import hashlib
 
 
 def hexhash(x):
-    return '0x' + hashlib.sha224(str(x)).hexdigest()[:6]
+    """
+    Account address for given index
+
+    :param x:int
+    :return: address:string
+    """
+
+    # References:
+    # - https://docs.python.org/3/library/hashlib.html
+    hash_str = str(x)
+    # encode the Unicode string into Bytes
+    hash_bytes = hash_str.encode('utf-8')
+    # Constructor for secure hash algorithm SHA224
+    hash_sha = hashlib.sha224(hash_bytes)
+    # Request digest concatenation of input strings fed so far
+    hash_sha_digest = hash_sha.hexdigest()[:6]
+    # print('hash sha224 digest: {}'.format(hash_sha.hexdigest()))
+    address = '0x' + hash_sha_digest
+    return address
 
 
 TransferEvent = collections.namedtuple('TransferEvent', 'sender, receiver, amount')
 
 
 class Accounts(object):
+    """
+    Generate accounts instances
+    """
+
     initial_supply = 0
 
     def __init__(self, num_accounts=0, copy_from=None):
@@ -35,20 +58,32 @@ class Accounts(object):
         return sum(self.balances.values())
 
     def median(self):
+        """
+        Median of the list of values stored in balances hash
+
+        Reference: https://docs.python.org/3/howto/sorting.html
+        i.e. balances = [1,5,3,7,6,7] # => [1, 3, 5, 6, 7, 7]
+             sorted(balances)[int(len(balances)/2)] # => 6
+        """
         return sorted(self.balances.values())[len(self.balances) / 2]
 
     def transfer(self, sender, receiver, amount):
+        # Transfer an amount from a sender account to a receiver account
         self.balances[sender] -= amount
         self.balances[receiver] += amount
         assert self.supply == self.initial_supply
 
     def random_transfer(self):
-        "generates a valid random transfer"
+        """
+        Generate a valid random transfer by:
+        - Choosing a random sender and receiver.
+        - Sending a random proportion of the senders balance to the receiver.
+        """
         while True:
-            sender = random.choice(self.balances.keys())
+            sender = random.choice(list(self.balances.keys()))
             if not self.balances[sender]:
                 continue
-            receiver = random.choice(self.balances.keys())
+            receiver = random.choice(list(self.balances.keys()))
             if sender == receiver:
                 continue
             amount = random.randint(1, self.balances[sender])
@@ -95,10 +130,10 @@ class Block(object):
         return s
 
 
-def gen_chain(height, p_revert, num_accounts, max_transfers):
+def gen_chain(max_height, p_revert, num_accounts, max_transfers):
     head = Block(num_accounts=num_accounts)
     chain = [head]
-    while head.number < height:
+    while head.number < max_height:
         if head.number > 0 and random.random() < p_revert:
             head = head.prevblock
         else:
@@ -124,14 +159,27 @@ def longest_revert(chain):
     return longest
 
 
-random.seed(43)
-chain = gen_chain(height=10, p_revert=0.5, num_accounts=100, max_transfers=10)
-serialized_blocks = [b.serialize(include_balances=False) for b in chain]
-# random.shuffle(serialized_blocks)
-print json.dumps(serialized_blocks, indent=4, sort_keys=True)
-print 'blocks: {} max reverted:{}'.format(len(chain), longest_revert(chain))
+def run():
+    """
+    Generate a blockchain with:
+    - height - Max. amount of blocks
+    - p_revert - Probability of the head of the blockchain reverting to a previous block
+    - num_accounts - Amount of Accounts to generate in the block
+    - max_transfers - Amount of transfers allowed between accounts
+    """
 
-txs = []
-for block in set(chain):
-    txs.extend(block.transfers)
-print 'total transfers:{} unique transfers:{}'.format(len(txs), len(set(txs)))
+    random.seed(43)
+    # chain = gen_chain(max_height=10, p_revert=0.5, num_accounts=100, max_transfers=10)
+    chain = gen_chain(max_height=3, p_revert=0.5, num_accounts=2, max_transfers=2)
+    serialized_blocks = [b.serialize(include_balances=True) for b in chain]
+    # random.shuffle(serialized_blocks)
+    print('json dumps: {}'.format(json.dumps(serialized_blocks, indent=4, sort_keys=True)))
+    print('blocks: {} max reverted:{}'.format(len(chain), longest_revert(chain)))
+
+    txs = []
+    for block in set(chain):
+        txs.extend(block.transfers)
+    print('total transfers:{} unique transfers:{}'.format(len(txs), len(set(txs))))
+
+if __name__ == '__main__':
+    run()

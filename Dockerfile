@@ -29,6 +29,8 @@ RUN which pip3
 
 # Copy over requirements
 COPY ./scripts/src/main.py .
+COPY ./scripts/src/demo_greeting.py .
+COPY ./scripts/src/demo_mockchain.py .
 COPY ./README.md .
 COPY ./requirements.txt .
 

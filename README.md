@@ -182,6 +182,16 @@ PyEthFinality
     * solidity-solhint
   * Compile Solidity Contract in VS Code - Press `FN+F5`
 
+  * IntelliJ Debugging with breakpoints in Python
+    * `brew install python3`
+    * File > Project Structure > Project SDK > New > /Users/Ls/.pyenv/versions/3.6.3/bin/python3
+      * Note: Assumes using PyEnv
+    * Edit Configurations > Click (+) > Python > Select Project SDK > Ok
+    * Allow use of breakpoints (add *.py file type instead of just default *.pyw)
+      * Preferences (CMD+,) > Editor > File Types > Add Wildcard > *.py
+    * Run > Debug 'mockchain'
+
+
 
 ## Chapter 100 - Contributors, Bugs & Issues <a id="chapter-100"></a>
 
