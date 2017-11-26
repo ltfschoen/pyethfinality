@@ -7,10 +7,43 @@ PyEthFinality
 * Trello Board (Project Planning) - https://trello.com/b/rkTmcLNw/pyethfinality
 
 # Table of Contents
+  * [Chapter 0 - Quick Start Guide](#chapter-0)
   * [Chapter 1 - Docker Setup](#chapter-1)
   * [Chapter 2 - Tests](#chapter-2)
+  * [Chapter 100 - Contributors, Bugs & Issues](#chapter-100)
   * [Chapter 999 - Unsorted](#chapter-999)
   * [Chapter 1000 - ERRORS - macOS Unix Bash Setup Attempt](#chapter-1000)
+
+## Chapter 0 - Quick Start Guide <a id="chapter-0"></a>
+
+* Clone https://github.com/ltfschoen/pyethfinality
+* Install and run Docker for Mac
+* Run `docker-compose up --force-recreate --build -d`
+* Get the container_id with `docker ps -l`
+* Create 1st Bash Terminal tab and run interactive Docker shell (for running Python script) with `docker exec -it <container_id> bash`
+* Create 2nd Bash Terminal tab and run interactive Docker shell (for TestRPC) with `docker exec -it <container_id> bash`
+* Start up the TestRPC in the 2nd Bash Terminal's Docker shell
+  ```
+  rm -rf ./db;
+  mkdir -p db/chaindb;
+  testrpc --account '0x0000000000000000000000000000000000000000000000000000000000000001, 10002471238800000000000' \
+    --account '0x0000000000000000000000000000000000000000000000000000000000000002, 10004471238800000000000' \
+    --unlock '0x0000000000000000000000000000000000000000000000000000000000000001' \
+    --unlock '0x0000000000000000000000000000000000000000000000000000000000000002' \
+    --blocktime 0 \
+    --deterministic true \
+    --port 8545 \
+    --hostname localhost \
+    --gasPrice 20000000000 \
+    --gasLimit 0x47E7C4 \
+    --debug true \
+    --mem true \
+    --db './db/chaindb'
+  ```
+* Run the Python script in the 1st Bash Terminal tab's Docker shell 
+  ```
+  python3 main.py
+  ```
 
 ## Chapter 1 - Docker Setup <a id="chapter-1"></a>
 
@@ -132,6 +165,16 @@ PyEthFinality
   python3.4 -m py.test tests/
   populus deploy --chain tester --no-wait-for-sync
   ```
+
+## Chapter 100 - Contributors, Bugs & Issues <a id="chapter-100"></a>
+
+* To report an issue, please create a Github issue with the following details:
+  * Which version of Solidity you are using
+  * What was the source code (if applicable)
+  * Which platform are you running on
+  * How to reproduce the issue
+  * What was the result of the issue
+  * What was the expected behaviour
 
 ## Chapter 999 - Unsorted <a id="chapter-999"></a>
 
