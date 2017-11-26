@@ -7,7 +7,7 @@ contract Greeter {
     event LogGreeting(string log);
 
     /// Greeter smart contract - Greeter() function called
-    function Greeter() {
+    function Greeter() public {
         greeting = 'Hello';
     }
 
@@ -17,7 +17,7 @@ contract Greeter {
     }
 
     /// Greeter smart contract - greet() function called
-    function greet() constant returns (string) {
+    function greet() public payable returns (string) {
         LogGreeting(greeting);
         return greeting;
     }
@@ -26,7 +26,7 @@ contract Greeter {
     // Fallback function called when contract is called but
     // no existing function was specified.
     // Allows ETH sent to be reverted.
-    function() {
+    function() public payable {
         LogGreeting('Reverting');
     }
 }
