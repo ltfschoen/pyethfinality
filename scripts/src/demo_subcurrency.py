@@ -8,6 +8,8 @@ from solc import install_solc, compile_source, compile_files
 # install_solc('v0.4.17')
 from web3.contract import ConciseContract
 from datetime import datetime
+from web3 import middleware
+from web3.middleware import pythonic_middleware, attrdict_middleware
 
 def current_time():
     return datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-1]
@@ -15,9 +17,18 @@ def current_time():
 # Middleware Data Structures
 class Blockchain(object):
 
-    def __init__(self, blocks):
-        self.blocks = blocks
-        self.created_at = current_time()
+    def __init__(self, _id, blocks=[]):
+        self._id = _id
+        self._blocks = blocks
+        self._created_at = current_time()
+
+    @property
+    def blocks(self):
+        return self._blocks
+
+    @blocks.setter
+    def blocks(self, blocks):
+        self._blocks = blocks
 
     def is_longest(self, status):
         self.is_longest = status
@@ -28,17 +39,40 @@ class Blockchain(object):
 
 class Block(object):
 
-    def __init__(self, block_name, blockchain_id):
-        self.block_name = block_name
-        self.blockchain_id = blockchain_id
-        self.created_at = current_time()
+    def __init__(self, block_hash, parent_block_hash, accounts=[]):
+        self._block_hash = block_hash
+        self._parent_block_hash = parent_block_hash
+        self._accounts = accounts
+        self._created_at = current_time()
+
+    @property
+    def accounts(self):
+        return self._accounts
+
+    @accounts.setter
+    def accounts(self, accounts):
+        self._accounts = accounts
+
+    def serialize(self):
+        s = dict(block_hash=self._block_hash,
+                 parent_block_hash=self._parent_block_hash,
+                 accounts=list(map(lambda x: x.__dict__, self._accounts)),
+                 created_at=self._created_at)
+        return s
 
 class Account(object):
 
-    def __init__(self, block_id, address, balance=0):
-        self.address = address
-        self.balance = balance
-        self.block_id = block_id
+    def __init__(self, address, balance=0):
+        self._address = address
+        self._balance = balance
+
+    def set_balance(self, balance):
+        self._balance = balance
+        
+    def get_balance(self):
+        return self._balance
+    
+    balance = property(get_balance, set_balance)
 
 class Transaction(object):
 
@@ -73,7 +107,14 @@ class EventLog(object):
         self.topic_name = topic_name
         self.created_at = current_time()
 
+# FIXME
 # Web3.py Middleware
+#
+# Each middleware in the stack gets invoked before the request 
+# reaches the provider, and then processes the result after the 
+# provider returns, in reverse order. It is possible for a 
+# middleware to return early from a call without the request ever 
+# getting to the provider (or even reaching the middlewares further down the stack).
 class Middleware(object):
     def __init__(self, make_request, web3):
         self.web3 = web3
@@ -81,15 +122,34 @@ class Middleware(object):
 
     def __call__(self, method, params):
         # do pre-processing here
+        print('Middleware pre-processing - __call__ method: {}'.format(method))
+        print('Middleware pre-processing - __call__ params: {}'.format(params))
 
         # perform the RPC request, getting the response
         response = self.make_request(method, params)
 
         # do post-processing here
+        print('Middleware post-processing - responses: {}'.format(params))
 
         # finally return the response
         return response
 
+TEST_RPC_ADDR = 'http://127.0.0.1:8545'
+
+# FIXME
+# Makes a request to a given URL (first arg) and optional params (second arg)
+def make_request(*args):
+    opener = build_opener()
+    opener.addheaders = [('User-agent',
+                          'Mozilla/5.0'+str(random.randrange(1000000)))]
+    try:
+        return opener.open(*args).read().strip()
+    except Exception as e:
+        try:
+            p = e.read().strip()
+        except:
+            p = e
+        raise Exception(p)
 
 def run():
     # Solidity source code
@@ -151,6 +211,12 @@ def run():
     print('TestRPC accounts: {}'.format(web3.eth.accounts))
     print('TestRPC block number: {}'.format(web3.eth.blockNumber))
 
+    # Web3.py Middleware
+    # Reference: http://web3py.readthedocs.io/en/latest/middleware.html
+
+    # FIXME
+    # Add Middleware
+    # web3.middleware_stack.add(pythonic_middleware(make_request(TEST_RPC_ADDR), web3), 'pythonic')
 
     # Instantiate and deploy contract
     # http://web3py.readthedocs.io/en/latest/web3.eth.html#contracts
@@ -178,25 +244,48 @@ def run():
         return web3.fromWei(web3.eth.getBalance(account), "ether")
 
     print('Account #1 & #2 balances - BEFORE tx: {}, {}'.format(get_balance(web3.eth.accounts[0]), get_balance(web3.eth.accounts[1])))
-    tx_res = contract_instance.sendSubCurrency(web3.eth.accounts[0], 50)
-    print('Tx successful: {}'.format(tx_res))
+    tx1 = contract_instance.sendSubCurrency(web3.eth.accounts[0], 50)
+    print('Tx1 successful: {}'.format(tx1))
+    tx2 = contract_instance.sendSubCurrency(web3.eth.accounts[0], 200)
+    print('Tx2 successful: {}'.format(tx2))
+    tx3 = contract_instance.sendSubCurrency(web3.eth.accounts[0], 300)
+    print('Tx3 successful: {}'.format(tx3))
     print('Account #1 & #2 balances - AFTER tx: {}, {}'.format(get_balance(web3.eth.accounts[0]), get_balance(web3.eth.accounts[1])))
     print('Account #1 balance: {}'.format(contract_instance.getBalance(web3.eth.accounts[0])))
     print('Account #2 balance: {}'.format(contract_instance.getBalance(web3.eth.accounts[1])))
     print('TestRPC block number: {}'.format(web3.eth.blockNumber))
     print('TestRPC block details: {}'.format(web3.eth.getBlock('latest')))
 
+    print('Accounts: {}'.format(web3.eth.accounts));
+
+    # transactions for longest (only) block 
+    transactions = web3.eth.getBlock('latest')['transactions']
+    print('Blockchain transactions: {}'.format(transactions))
+
+    # FIXME
     # Web3.py API Block, Transaction, and Event Log Filters 
     # Reference: http://web3py.readthedocs.io/en/latest/filters.html
-    # web3.utils.filters.get_all_entries()
+    # print('Web3 Filters: {}'.format(web3.utils.filters.get_all_entries()))
 
-    # Web3.py Middleware
-    # Reference: http://web3py.readthedocs.io/en/latest/middleware.html
+    # FIXME
+    # Web3.py TX Pool API
+    print('Tx Pool: {}'.format(web3.txpool.__dict__))
+
+    blockchain1 = Blockchain(_id=web3.eth.getBlock('latest')['number'])
+    block1 = Block(web3.eth.getBlock('latest')['hash'], web3.eth.getBlock('latest')['parentHash'])
+    blockchain1.blocks.append(block1)
+    account1 = Account(web3.eth.accounts[0], contract_instance.getBalance(web3.eth.accounts[0]))
+    account2 = Account(web3.eth.accounts[1], contract_instance.getBalance(web3.eth.accounts[1]))
+    block1.accounts.append(account1)
+    block1.accounts.append(account2)
+
+    serialized_blocks = [b.serialize() for b in blockchain1.blocks]
+    # random.shuffle(serialized_blocks)
+    print('json dumps: {}'.format(json.dumps(serialized_blocks, indent=4, sort_keys=True)))
+
+    # Clear Middleware
     web3.middleware_stack.clear()
     assert len(web3.middleware_stack) == 0
-
-    # Web3.py TX Pool API
-    print('Tx Pool: {}'.format(web3.txpool.inspect))
 
 if __name__ == '__main__':
     run()

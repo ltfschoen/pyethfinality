@@ -27,11 +27,6 @@ RUN echo 'export PYTHONDONTWRITEBYTECODE=1' >> ~/.bash_profile && . ~/.bash_prof
 RUN which python3
 RUN which pip3
 
-# Copy over requirements
-COPY ./scripts/src/main.py .
-COPY ./scripts/src/demo_greeting.py .
-COPY ./scripts/src/demo_mockchain.py .
-COPY ./README.md .
 COPY ./requirements.txt .
 
 # Install python dependencies
@@ -60,3 +55,11 @@ RUN apt-get install -y nodejs
 RUN npm install -g ethereumjs-testrpc
 
 RUN mkdir -p db/chaindb;
+
+# Copy over requirements
+COPY ./scripts/src/main.py .
+COPY ./scripts/src/demo_greeting.py .
+COPY ./scripts/src/demo_mockchain.py .
+COPY ./scripts/src/demo_microservice.py .
+COPY ./scripts/src/demo_subcurrency.py .
+COPY ./README.md .
