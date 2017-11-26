@@ -1,6 +1,7 @@
 import json
 import web3
 import solc
+import math
 from web3 import Web3, HTTPProvider, TestRPCProvider
 from solc import install_solc, compile_source, compile_files
 # Note: py-solc only supports up to 0.4.17
@@ -34,8 +35,12 @@ class Blockchain(object):
         self.is_longest = status
 
     def median_account_balance(self):
-        account_balances = map((lambda x:func(x.account.balance)), self.blocks)
-        return sorted(account_balances)[len(self.account_balances) / 2]
+        account_balances = []
+        for block in self.blocks:
+            for account in block.accounts:
+                account_balances.append(account.get_balance())
+
+        return sorted(account_balances)[math.ceil(len(account_balances) / 2)]
 
 class Block(object):
 
@@ -282,6 +287,9 @@ def run():
     serialized_blocks = [b.serialize() for b in blockchain1.blocks]
     # random.shuffle(serialized_blocks)
     print('json dumps: {}'.format(json.dumps(serialized_blocks, indent=4, sort_keys=True)))
+
+    # Re-calculate blockchain median account balance
+    print('Blockchain1 median account balance: {}'.format(blockchain1.median_account_balance()))
 
     # Clear Middleware
     web3.middleware_stack.clear()
