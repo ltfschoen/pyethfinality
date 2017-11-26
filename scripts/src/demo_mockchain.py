@@ -5,6 +5,7 @@ import collections
 import random
 import json
 import hashlib
+import math
 
 
 def hexhash(x):
@@ -143,7 +144,7 @@ def gen_chain(max_height, p_revert, num_accounts, max_transfers):
                 sibling = chain[-2]
                 # include some of its txs
                 head.copy_transfers(sibling, 0.5)
-                head.random_transfers(random.randint(0, max_transfers / 2))
+                head.random_transfers(random.randint(0, math.ceil(max_transfers / 2)))
             else:
                 head.random_transfers(random.randint(0, max_transfers))
             chain.append(head)
@@ -151,26 +152,28 @@ def gen_chain(max_height, p_revert, num_accounts, max_transfers):
 
 
 def longest_revert(chain):
-    heighest = 0
-    longest = 0
+    highest_chain = 0
+    longest_revert = 0
     for block in chain:
-        heighest = max(heighest, block.number)
-        longest = max(longest, heighest - block.number)
-    return longest
+        highest_chain = max(highest_chain, block.number)
+        longest_revert = max(longest_revert, highest_chain - block.number)
+    return longest_revert
 
 
 def run():
     """
     Generate a blockchain with:
     - height - Max. amount of blocks
-    - p_revert - Probability of the head of the blockchain reverting to a previous block
+    - p_revert - Probability of the state of the head of the blockchain reverting 
+      to a previous block based on quantity of block confirmations until finalised 
+      and the value of the transaction 
     - num_accounts - Amount of Accounts to generate in the block
     - max_transfers - Amount of transfers allowed between accounts
     """
 
     random.seed(43)
     # chain = gen_chain(max_height=10, p_revert=0.5, num_accounts=100, max_transfers=10)
-    chain = gen_chain(max_height=3, p_revert=0.5, num_accounts=2, max_transfers=2)
+    chain = gen_chain(max_height=3, p_revert=0.6, num_accounts=2, max_transfers=1)
     serialized_blocks = [b.serialize(include_balances=True) for b in chain]
     # random.shuffle(serialized_blocks)
     print('json dumps: {}'.format(json.dumps(serialized_blocks, indent=4, sort_keys=True)))
