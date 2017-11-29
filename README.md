@@ -28,8 +28,8 @@ PyEthFinality
   ```
   rm -rf ./db;
   mkdir -p db/chaindb;
-  testrpc --account '0x0000000000000000000000000000000000000000000000000000000000000001, 10002471238800000000000' \
-    --account '0x0000000000000000000000000000000000000000000000000000000000000002, 10004471238800000000000' \
+  testrpc --account '0x0000000000000000000000000000000000000000000000000000000000000001, 50002471238800000000000' \
+    --account '0x0000000000000000000000000000000000000000000000000000000000000002, 370004471238800000000000' \
     --unlock '0x0000000000000000000000000000000000000000000000000000000000000001' \
     --unlock '0x0000000000000000000000000000000000000000000000000000000000000002' \
     --blocktime 0 \
@@ -52,7 +52,7 @@ PyEthFinality
   ```
   * Screenshot of response containing median account balance
 
-    ![alt tag](https://raw.githubusercontent.com/ltfschoen/pyethfinality/master/screenshots/api_response_middleware.png)
+    ![alt tag](https://raw.githubusercontent.com/ltfschoen/pyethfinality/master/screenshots/api_response_middleware_fix.png)
 
 * Run PyTest in Docker shell
   ```
