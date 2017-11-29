@@ -22,8 +22,11 @@ def get_query():
         abort(400)
     print("Query Params: ", query_params, file=sys.stderr)
 
-    response = demo_subcurrency.get_or_set_blockchain_data('blockchain_data', None)
+    data = demo_subcurrency.get_or_set_blockchain_data('blockchain_data', None)
     # response = {'success':True}
+    response = {
+        "blockchain": data
+    }
     return jsonify(response), 200, {'ContentType':'application/json'}
 
 @app.route('/', methods=['POST'])
