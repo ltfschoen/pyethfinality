@@ -47,10 +47,12 @@ class Blockchain(object):
 
 class Block(object):
 
-    def __init__(self, block_hash, parent_block_hash, accounts=[]):
+    def __init__(self, id, block_hash, parent_block_hash, accounts=[], transactions=[]):
+        self._id = id,
         self._block_hash = block_hash
         self._parent_block_hash = parent_block_hash
         self._accounts = accounts
+        self._transactions = transactions
         self._created_at = current_time()
 
     @property
@@ -61,10 +63,25 @@ class Block(object):
     def accounts(self, accounts):
         self._accounts = accounts
 
+    def set_transaction(self, transaction):
+        self._transactions.append(transaction)
+        
+    def get_balance(self):
+        return self._balance
+
+    def get_block_hash(self):
+        return self._block_hash
+    
+    transaction = property(set_transaction)
+    balance = property(get_balance)
+    block_hash = property(get_block_hash)
+
     def serialize(self):
-        s = dict(block_hash=self._block_hash,
+        s = dict(id=self._id,
+                 block_hash=self._block_hash,
                  parent_block_hash=self._parent_block_hash,
                  accounts=list(map(lambda x: x.__dict__, self._accounts)),
+                 transactions=list(map(lambda x: x.__dict__, self._transactions)),
                  created_at=self._created_at)
         return s
 
@@ -74,6 +91,9 @@ class Account(object):
         self._address = address
         self._balance = balance
 
+    def get_address(self):
+        return self._address
+
     def set_balance(self, balance):
         self._balance = balance
         
@@ -81,10 +101,11 @@ class Account(object):
         return self._balance
     
     balance = property(get_balance, set_balance)
+    address = property(get_address)
 
 class Transaction(object):
 
-    def __init__(self, tx_receipt, account_id, address_from, address_to, amount, status, probability_reverted):
+    def __init__(self, tx_receipt, account_id, account_from, account_to, amount, status, probability_reverted):
         self.tx_receipt = tx_receipt
         self.account_from = account_from
         self.account_to = account_to
@@ -92,7 +113,6 @@ class Transaction(object):
         self.status = status
         self.probability_reverted = probability_reverted
         self.account_id = account_id
-        self.transfer()
 
     def transfer(self):
         self.account_from.balance -= self.amount
@@ -189,19 +209,32 @@ def run():
         /// Listener receives arguments `from`, `to`, `amount` when "event" fired to help track transactions.
         event SentSubCurrency(address from, address to, uint amount);
 
+        /// Transferred between two accounts
+        event TransferredSubCurrency(address from, address to, uint amount);
+
         // Constructor run only when contract created to generate minter initial account balance
         function SubCurrency() {
             minter = msg.sender;
             balances[tx.origin] = 1000;
         }
 
-        function sendSubCurrency(address receiver, uint amount) returns (bool success) {
-            if (balances[msg.sender] < amount) {
+        function sendSubCurrency(address sender, address receiver, uint amount) public returns (bool success) {
+            if (balances[sender] < amount) {
                 return false;
             }
-            balances[msg.sender] -= amount;
+            balances[sender] -= amount;
             balances[receiver] += amount;
-            SentSubCurrency(msg.sender, receiver, amount);
+            SentSubCurrency(sender, receiver, amount);
+            return true;
+        }
+
+        function transferSubCurrency(address sender, address receiver, uint amount) public returns (bool success) {
+            if (balances[sender] < amount) {
+                return false;
+            }
+            balances[sender] -= amount;
+            balances[receiver] += amount;
+            TransferredSubCurrency(sender, receiver, amount);
             return true;
         }
 
@@ -259,11 +292,11 @@ def run():
         return web3.fromWei(web3.eth.getBalance(account), "ether")
 
     print('Account #1 & #2 balances - BEFORE tx: {}, {}'.format(get_balance(web3.eth.accounts[0]), get_balance(web3.eth.accounts[1])))
-    tx1 = contract_instance.sendSubCurrency(web3.eth.accounts[0], 50)
+    tx1 = contract_instance.sendSubCurrency(web3.eth.accounts[0], web3.eth.accounts[1], 50)
     print('Tx1 successful: {}'.format(tx1))
-    tx2 = contract_instance.sendSubCurrency(web3.eth.accounts[0], 200)
+    tx2 = contract_instance.sendSubCurrency(web3.eth.accounts[0], web3.eth.accounts[1], 200)
     print('Tx2 successful: {}'.format(tx2))
-    tx3 = contract_instance.sendSubCurrency(web3.eth.accounts[0], 300)
+    tx3 = contract_instance.sendSubCurrency(web3.eth.accounts[0], web3.eth.accounts[1], 300)
     print('Tx3 successful: {}'.format(tx3))
     print('Account #1 & #2 balances - AFTER tx: {}, {}'.format(get_balance(web3.eth.accounts[0]), get_balance(web3.eth.accounts[1])))
     print('Account #1 balance: {}'.format(contract_instance.getBalance(web3.eth.accounts[0])))
@@ -286,13 +319,84 @@ def run():
     # Web3.py TX Pool API
     print('Tx Pool: {}'.format(web3.txpool.__dict__))
 
-    blockchain1 = Blockchain(_id=web3.eth.getBlock('latest')['number'])
-    block1 = Block(web3.eth.getBlock('latest')['hash'], web3.eth.getBlock('latest')['parentHash'])
+    # Demonstration of generating a list of sample transactions with multiple chain reorganisations
+    # that each would result in different balances. We handle this by our algorithm calculating 
+    # the longest one of these chains and providing that to the Client App
+
+    a1 = web3.eth.accounts[0]
+    a2 = web3.eth.accounts[1]
+
+    # Create Chain No. 1.
+    #   - Balance of Account No. 0 (with address 0x7e5f4552091a69125d5dfcb7b8c2659029395bdf): 5
+    #   - Balance of Account No. 1 (with address 0x2b5ad5c4795c026514f8317c7a215e218dccd6cf): 37
+
+    # Blockchain 1
+    # ==============
+    blockchain1 = Blockchain(_id=1)
+    
+    # Block 0 on Blockchain 1
+    block0 = Block(0, web3.eth.getBlock('latest')['hash'], web3.eth.getBlock('latest')['parentHash'])
+    blockchain1.blocks.append(block0)
+    account1 = Account(a1, contract_instance.getBalance(a1))
+    account2 = Account(a2, contract_instance.getBalance(a2))
+    block0.accounts.append(account1)
+    block0.accounts.append(account2)
+
+    # Block 1 on Blockchain 1
+    block1 = Block(1, '0xa700000000000000000000000000000000000000000000000000000000000000', block0.get_block_hash())
     blockchain1.blocks.append(block1)
-    account1 = Account(web3.eth.accounts[0], contract_instance.getBalance(web3.eth.accounts[0]))
-    account2 = Account(web3.eth.accounts[1], contract_instance.getBalance(web3.eth.accounts[1]))
+    account1 = Account(a1, contract_instance.getBalance(a1))
+    account2 = Account(a2, contract_instance.getBalance(a2))
     block1.accounts.append(account1)
     block1.accounts.append(account2)
+
+    # Block 2 on Blockchain 1 (with transfer)
+    block2 = Block(2, '0x7100000000000000000000000000000000000000000000000000000000000000', block1.get_block_hash())
+    blockchain1.blocks.append(block2)
+    account1 = Account(a1, contract_instance.getBalance(a1))
+    account2 = Account(a2, contract_instance.getBalance(a2))
+    block2.accounts.append(account1)
+    block2.accounts.append(account2)
+    # Simulate transfer on Block 2 of Blockchain 1
+    tx1_bc1_from = a1
+    tx1_bc1_to = a2
+    tx1_bc1_amount = 5000
+    tx1_bc1 = contract_instance.transferSubCurrency(tx1_bc1_from, tx1_bc1_to, tx1_bc1_amount)
+    transaction1 = Transaction(None, tx1_bc1_from, tx1_bc1_to, tx1_bc1_amount, 'pending', 0.5, account1.get_address())
+    block2.set_transaction(transaction1)
+
+    # Create Chain No. 2 
+
+    # Block 3 on Blockchain 2 has Parent of Block 0 on Blockchain 1 (has same Block ID of 1 as that already on Chain No. 1)
+    block3 = Block(1, '0xfb00000000000000000000000000000000000000000000000000000000000000', block0.get_block_hash())
+    blockchain1.blocks.append(block3)
+    account1 = Account(a1, contract_instance.getBalance(a1))
+    account2 = Account(a2, contract_instance.getBalance(a2))
+    block3.accounts.append(account1)
+    block3.accounts.append(account2)
+
+    # Block 4 on Blockchain 2 has Parent of Block 3 on Blockchain 2 (has same Block ID of 2 as that already on Chain No. 1)
+    block4 = Block(2, '0x5a00000000000000000000000000000000000000000000000000000000000000', block3.get_block_hash())
+    blockchain1.blocks.append(block4)
+    account1 = Account(a1, contract_instance.getBalance(a1))
+    account2 = Account(a2, contract_instance.getBalance(a2))
+    block4.accounts.append(account1)
+    block4.accounts.append(account2)
+    # Simulate transfer on Block 4 of Blockchain 2
+    tx1_bc2_from = a1
+    tx1_bc2_to = a2
+    tx1_bc2_amount = 34000
+    tx1_bc2 = contract_instance.transferSubCurrency(tx1_bc2_from, tx1_bc2_to, tx1_bc2_amount)
+    transaction2 = Transaction(None, tx1_bc2_from, tx1_bc2_to, tx1_bc2_amount, 'pending', 0.5, account2.get_address())
+    block4.set_transaction(transaction2)
+
+    # Block 5 on Blockchain 2 has Parent of Block 4 on Blockchain 2
+    block5 = Block(3, '0x5100000000000000000000000000000000000000000000000000000000000000', block4.get_block_hash())
+    blockchain1.blocks.append(block5)
+    account1 = Account(a1, contract_instance.getBalance(a1))
+    account2 = Account(a2, contract_instance.getBalance(a2))
+    block5.accounts.append(account1)
+    block5.accounts.append(account2)
 
     serialized_blocks = [b.serialize() for b in blockchain1.blocks]
     serialized_blocks[0]['median_account_balance'] = blockchain1.median_account_balance()

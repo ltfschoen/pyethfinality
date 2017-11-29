@@ -18,6 +18,8 @@ contract SubCurrency {
     /// Listener receives arguments `from`, `to`, `amount` when "event" fired to help track transactions.
     event SentSubCurrency(address from, address to, uint amount);
 
+    event TransferredSubCurrency(address from, address to, uint amount);
+
     // Constructor run only when contract created to generate minter initial account balance
     function SubCurrency() public {
         minter = msg.sender;
@@ -31,6 +33,16 @@ contract SubCurrency {
         balances[msg.sender] -= amount;
         balances[receiver] += amount;
         SentSubCurrency(msg.sender, receiver, amount);
+        return true;
+    }
+
+    function transferSubCurrency(address sender, address receiver, uint amount) public returns (bool success) {
+        if (balances[sender] < amount) {
+            return false;
+        }
+        balances[sender] -= amount;
+        balances[receiver] += amount;
+        TransferredSubCurrency(sender, receiver, amount);
         return true;
     }
 
