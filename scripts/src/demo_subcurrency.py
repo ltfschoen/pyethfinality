@@ -365,11 +365,15 @@ def run():
     transaction1 = Transaction(None, tx1_bc1_from, tx1_bc1_to, tx1_bc1_amount, 'pending', 0.5, account1.get_address())
     block2.set_transaction(transaction1)
 
+    # Blockchain 2
+    # ==============
+    blockchain2 = Blockchain(_id=2)
+
     # Create Chain No. 2 
 
     # Block 3 on Blockchain 2 has Parent of Block 0 on Blockchain 1 (has same Block ID of 1 as that already on Chain No. 1)
     block3 = Block(1, '0xfb00000000000000000000000000000000000000000000000000000000000000', block0.get_block_hash())
-    blockchain1.blocks.append(block3)
+    blockchain2.blocks.append(block3)
     account1 = Account(a1, contract_instance.getBalance(a1))
     account2 = Account(a2, contract_instance.getBalance(a2))
     block3.accounts.append(account1)
@@ -377,7 +381,7 @@ def run():
 
     # Block 4 on Blockchain 2 has Parent of Block 3 on Blockchain 2 (has same Block ID of 2 as that already on Chain No. 1)
     block4 = Block(2, '0x5a00000000000000000000000000000000000000000000000000000000000000', block3.get_block_hash())
-    blockchain1.blocks.append(block4)
+    blockchain2.blocks.append(block4)
     account1 = Account(a1, contract_instance.getBalance(a1))
     account2 = Account(a2, contract_instance.getBalance(a2))
     block4.accounts.append(account1)
@@ -392,24 +396,43 @@ def run():
 
     # Block 5 on Blockchain 2 has Parent of Block 4 on Blockchain 2
     block5 = Block(3, '0x5100000000000000000000000000000000000000000000000000000000000000', block4.get_block_hash())
-    blockchain1.blocks.append(block5)
+    blockchain2.blocks.append(block5)
     account1 = Account(a1, contract_instance.getBalance(a1))
     account2 = Account(a2, contract_instance.getBalance(a2))
     block5.accounts.append(account1)
     block5.accounts.append(account2)
 
-    serialized_blocks = [b.serialize() for b in blockchain1.blocks]
-    serialized_blocks[0]['median_account_balance'] = blockchain1.median_account_balance()
-    # random.shuffle(serialized_blocks)
-    print('json dumps: {}'.format(json.dumps(serialized_blocks, indent=4, sort_keys=True)))
+    # Find longest chain to return to Client App due to chain re-organisation
+    def get_longest_chain(chains):
+        longest_length = 0
+        longest_chain_id = None
+        for chain_id, chain in chains.items():
+            if len(chain.blocks) > longest_length:
+                longest_chain_id = chain_id
+
+        chains[longest_chain_id].is_longest = True
+
+        # Longest blockchain with median account balance
+        longest_blockchain_serialized_blocks = [b.serialize() for b in chains[longest_chain_id].blocks]
+
+        # Re-calculate blockchain median account balance
+        longest_blockchain_serialized_blocks[0]['median_account_balance'] = chains[longest_chain_id].median_account_balance()
+        longest_blockchain_serialized_blocks[0]['blockchain_length'] = len(chains[longest_chain_id].blocks)
+        print('Longest chain json dumps: {}'.format(json.dumps(longest_blockchain_serialized_blocks, indent=4, sort_keys=True)))
+
+        return longest_blockchain_serialized_blocks
+
+    blockchains = {
+        "1": blockchain1,
+        "2": blockchain2
+    }
+    longest_chain = get_longest_chain(blockchains)
+    print('Longest chain: {}'.format(longest_chain))
     
     # Store in cache - http://flask.pocoo.org/docs/0.12/patterns/caching/
-    get_or_set_blockchain_data('blockchain_data', serialized_blocks)
+    get_or_set_blockchain_data('blockchain_data', longest_chain)
 
     print('Cached data: {}'.format(get_or_set_blockchain_data('blockchain_data', None)))
-
-    # Re-calculate blockchain median account balance
-    print('Blockchain1 median account balance: {}'.format(blockchain1.median_account_balance()))
 
     # Clear Middleware
     web3.middleware_stack.clear()
