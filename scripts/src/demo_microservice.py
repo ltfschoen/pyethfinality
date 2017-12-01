@@ -25,7 +25,7 @@ def get_query():
     data = demo_subcurrency.get_or_set_blockchain_data('blockchain_data', None)
     # response = {'success':True}
     response = {
-        "blockchain": data
+        "longest_chain": data
     }
     return jsonify(response), 200, {'ContentType':'application/json'}
 

@@ -50,9 +50,141 @@ PyEthFinality
   ```
   curl -i 127.0.0.1:5000/api/v1.0/query?query=None&median_balance=True
   ```
-  * Screenshot of response containing median account balance
+  * Response containing median account balance
 
-    ![alt tag](https://raw.githubusercontent.com/ltfschoen/pyethfinality/master/screenshots/api_response_middleware_fix.png)
+    ```
+    root@ed71f34ac199:/code# curl -i 127.0.0.1:5000/api/v1.0/query?query=None&median_balance=True
+    [1] 204
+    root@ed71f34ac199:/code# HTTP/1.0 200 OK
+    Content-Type: application/json
+    ContentType: application/json
+    Content-Length: 4264
+    Server: Werkzeug/0.12.2 Python/3.6.3
+    Date: Fri, 01 Dec 2017 20:42:28 GMT
+
+    {
+      "longest_chain": {
+        "block_count": 3, 
+        "blocks": [
+          {
+            "accounts": [
+              {
+                "_address": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "_balance": 1000
+              }, 
+              {
+                "_address": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "_balance": 0
+              }
+            ], 
+            "block_hash": "0xfb00000000000000000000000000000000000000000000000000000000000000", 
+            "created_at": "2017-12-01 20:42:14.61162", 
+            "id": [
+              1
+            ], 
+            "parent_block_hash": "0x2d3816b0c954bf9495cf1eae723f73ae8c9f140622a07f5ba69f0897a8bae72a", 
+            "transactions": [
+              {
+                "account_from": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "account_id": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "account_to": 5000, 
+                "amount": "pending", 
+                "probability_reverted": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "status": 0.5, 
+                "tx_receipt": null
+              }, 
+              {
+                "account_from": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "account_id": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "account_to": 34000, 
+                "amount": "pending", 
+                "probability_reverted": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "status": 0.5, 
+                "tx_receipt": null
+              }
+            ]
+          }, 
+          {
+            "accounts": [
+              {
+                "_address": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "_balance": 1000
+              }, 
+              {
+                "_address": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "_balance": 0
+              }
+            ], 
+            "block_hash": "0x5a00000000000000000000000000000000000000000000000000000000000000", 
+            "created_at": "2017-12-01 20:42:14.66245", 
+            "id": [
+              2
+            ], 
+            "parent_block_hash": "0xfb00000000000000000000000000000000000000000000000000000000000000", 
+            "transactions": [
+              {
+                "account_from": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "account_id": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "account_to": 5000, 
+                "amount": "pending", 
+                "probability_reverted": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "status": 0.5, 
+                "tx_receipt": null
+              }, 
+              {
+                "account_from": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "account_id": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "account_to": 34000, 
+                "amount": "pending", 
+                "probability_reverted": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "status": 0.5, 
+                "tx_receipt": null
+              }
+            ]
+          }, 
+          {
+            "accounts": [
+              {
+                "_address": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "_balance": 1000
+              }, 
+              {
+                "_address": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "_balance": 0
+              }
+            ], 
+            "block_hash": "0x5100000000000000000000000000000000000000000000000000000000000000", 
+            "created_at": "2017-12-01 20:42:14.75240", 
+            "id": [
+              3
+            ], 
+            "parent_block_hash": "0x5a00000000000000000000000000000000000000000000000000000000000000", 
+            "transactions": [
+              {
+                "account_from": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "account_id": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "account_to": 5000, 
+                "amount": "pending", 
+                "probability_reverted": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "status": 0.5, 
+                "tx_receipt": null
+              }, 
+              {
+                "account_from": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "account_id": "0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf", 
+                "account_to": 34000, 
+                "amount": "pending", 
+                "probability_reverted": "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF", 
+                "status": 0.5, 
+                "tx_receipt": null
+              }
+            ]
+          }
+        ], 
+        "median_account_balance": 1000
+      }
+    }
+    ```
 
 * Run PyTest in Docker shell
   ```
@@ -198,8 +330,6 @@ PyEthFinality
     * Allow use of breakpoints (add *.py file type instead of just default *.pyw)
       * Preferences (CMD+,) > Editor > File Types > Add Wildcard > *.py
     * Run > Debug 'mockchain'
-
-
 
 ## Chapter 100 - Contributors, Bugs & Issues <a id="chapter-100"></a>
 
